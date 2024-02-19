@@ -25,7 +25,7 @@ class eGreedyPolicy:
 
             # returning random action, excluding best
             return np.random.choice(
-                np.delete(list(range(N_BANDITS)), np.argmax(success_ratio))
+                np.delete(list(range(n_bandits)), np.argmax(success_ratio))
             )
 
         # else return best
@@ -35,7 +35,7 @@ class eGreedyPolicy:
             return np.argmax(success_ratio)
 
 
-# e-greedy policy
+# upper confidence bound policy
 class UCBPolicy:
 
     # initializing
@@ -46,7 +46,6 @@ class UCBPolicy:
 
     # choice of bandit
     def choose_bandit(self, k_array, reward_array, n_bandits):
-
         # sucesses and total draws
         success_count = reward_array.sum(axis=1)
         total_count = k_array.sum(axis=1)
@@ -59,6 +58,34 @@ class UCBPolicy:
 
         # returning best greedy action
         return np.argmax(success_ratio + sqrt_term)
+
+
+# upper confidence bound policy
+# version B, where we max out the upper confidence at 1
+class UCBPolicyB:
+
+    # initializing
+    def __init__(self):
+
+        # nothing to do here
+        pass
+
+    # choice of bandit
+    def choose_bandit(self, k_array, reward_array, n_bandits):
+        # sucesses and total draws
+        success_count = reward_array.sum(axis=1)
+        total_count = k_array.sum(axis=1)
+
+        # ratio of sucesses vs total
+        success_ratio = success_count / total_count
+
+        # computing square root term
+        sqrt_term = np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
+
+        # returning best greedy action
+        return np.argmax(
+            [min(1, success_ratio[i] + sqrt_term[i]) for i in range(n_bandits)]
+        )
 
 
 # e-greedy policy

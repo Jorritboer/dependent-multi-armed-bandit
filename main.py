@@ -2,6 +2,7 @@ import numpy as np
 import plot
 import policies
 import cvxpy as cp
+from simulation import simulation
 
 
 class MAB:
@@ -80,6 +81,14 @@ def random_policy(k_array, reward_array, n_bandits):
     return np.random.choice(range(n_bandits), 1)[0]
 
 
-plot.plot_MAB_experiment(
-    policies.UCBPolicy().choose_bandit, mab, 100, bandit_probs, "Bounded UCB"
-)
+plot.plot_MAB_experiment(choose_bandit, mab, 100, bandit_probs, "Bounded UCB")
+
+
+algorithms = {
+    "e_greedy": policies.eGreedyPolicy(0.1).choose_bandit,
+    "ucb": policies.UCBPolicy().choose_bandit,
+    "ts": policies.TSPolicy().choose_bandit,
+    "ucb-bounded": policies.TSPolicy().choose_bandit,
+}
+
+simulation(mab, algorithms, 100, 100)
