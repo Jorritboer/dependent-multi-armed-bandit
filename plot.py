@@ -54,15 +54,22 @@ def plot_MAB_experiment(
     ax1 = plt.subplot2grid((5, 4), (0, 0), colspan=4, rowspan=3)
     ax2 = plt.subplot2grid((5, 4), (3, 0), rowspan=2)
     ax3 = plt.subplot2grid((5, 4), (3, 1), rowspan=2)
-    ax4 = plt.subplot2grid((5, 4), (3, 2), rowspan=2)
-    ax5 = plt.subplot2grid((5, 4), (3, 3), rowspan=2)
+    axes = [ax2, ax3]
+    if N_BANDITS > 2:
+        ax4 = plt.subplot2grid((5, 4), (3, 2), rowspan=2)
+        axes.append(ax4)
+    if N_BANDITS > 3:
+        ax5 = plt.subplot2grid((5, 4), (3, 3), rowspan=2)
+        axes.append(ax5)
 
+    total_regret = 0
     # loop generating draws
     for draw_number in range(N_DRAWS):
 
         # record information about this draw
         k = decision_policy(k_array, reward_array, N_BANDITS)
         reward, regret = mab.draw(k)
+        total_regret += regret
 
         # record information about this draw
         k_list.append(k)
@@ -96,17 +103,13 @@ def plot_MAB_experiment(
     ax1.set_title(plot_title, fontsize=10)
     ax1.set_xlabel("Round", fontsize=10)
     ax1.set_ylabel("Bandit", fontsize=10)
-    ax1.set_yticks([0, 1, 2, 3])
-    ax1.set_yticklabels(
-        ["{}\n($\\theta = {}$)".format(i, bandit_probs[i]) for i in range(4)]
-    )
+    ax1.set_yticks(list(range(N_BANDITS)))
+    ax1.set_yticklabels([f"\n($p_{i} = {bandit_probs[i]}$)" for i in range(N_BANDITS)])
     ax1.tick_params(labelsize=10)
 
     # titles of distribution plots
-    ax2.set_title("Estimated $\\theta_0$", fontsize=10)
-    ax3.set_title("Estimated $\\theta_1$", fontsize=10)
-    ax4.set_title("Estimated $\\theta_2$", fontsize=10)
-    ax5.set_title("Estimated $\\theta_3$", fontsize=10)
+    for i in range(N_BANDITS):
+        axes[i].set_title(f"Estimated $p_{i+1}$", fontsize=10)
 
     # initializing with first data
     scatter = ax1.scatter(
@@ -118,34 +121,14 @@ def plot_MAB_experiment(
         s=30,
         facecolor=[facecolor_list[0]],
     )
-    dens1 = ax2.fill_between(
-        posterior_anim_dict[0][0]["X"],
-        0,
-        posterior_anim_dict[0][0]["curve"],
-        color="red",
-        alpha=0.7,
-    )
-    dens2 = ax3.fill_between(
-        posterior_anim_dict[1][0]["X"],
-        0,
-        posterior_anim_dict[1][0]["curve"],
-        color="green",
-        alpha=0.7,
-    )
-    dens3 = ax4.fill_between(
-        posterior_anim_dict[2][0]["X"],
-        0,
-        posterior_anim_dict[2][0]["curve"],
-        color="blue",
-        alpha=0.7,
-    )
-    dens4 = ax5.fill_between(
-        posterior_anim_dict[3][0]["X"],
-        0,
-        posterior_anim_dict[3][0]["curve"],
-        color="purple",
-        alpha=0.7,
-    )
+    for j in range(N_BANDITS):
+        axes[j].fill_between(
+            posterior_anim_dict[j][0]["X"],
+            0,
+            posterior_anim_dict[j][0]["curve"],
+            color="red",
+            alpha=0.7,
+        )
 
     # titles
     # plt.title('Random draws from the row of slot machines (MAB)', fontsize=10)
@@ -156,10 +139,8 @@ def plot_MAB_experiment(
 
         # clearing axes
         ax1.clear()
-        ax2.clear()
-        ax3.clear()
-        ax4.clear()
-        ax5.clear()
+        for j in range(N_BANDITS):
+            axes[j].clear()
 
         # updating game rounds
         scatter = ax1.scatter(
@@ -177,47 +158,20 @@ def plot_MAB_experiment(
         ax1.set_title(plot_title, fontsize=10)
         ax1.set_xlabel("Round", fontsize=10)
         ax1.set_ylabel("Bandit", fontsize=10)
-        ax1.set_yticks([0, 1, 2, 3])
-        ax1.set_yticklabels(
-            ["{}\n($\\theta = {}$)".format(i, bandit_probs[i]) for i in range(4)]
-        )
+        ax1.set_yticks(list(range(N_BANDITS)))
+        ax1.set_yticklabels([f"1\n$p_{j}={bandit_probs[j]}$" for j in range(N_BANDITS)])
         ax1.tick_params(labelsize=10)
 
         # updating distributions
-        dens1 = ax2.fill_between(
-            posterior_anim_dict[0][i]["X"],
-            0,
-            posterior_anim_dict[0][i]["curve"],
-            color="red",
-            alpha=0.7,
-        )
-        dens2 = ax3.fill_between(
-            posterior_anim_dict[1][i]["X"],
-            0,
-            posterior_anim_dict[1][i]["curve"],
-            color="green",
-            alpha=0.7,
-        )
-        dens3 = ax4.fill_between(
-            posterior_anim_dict[2][i]["X"],
-            0,
-            posterior_anim_dict[2][i]["curve"],
-            color="blue",
-            alpha=0.7,
-        )
-        dens4 = ax5.fill_between(
-            posterior_anim_dict[3][i]["X"],
-            0,
-            posterior_anim_dict[3][i]["curve"],
-            color="purple",
-            alpha=0.7,
-        )
-
-        # titles of distribution plots
-        ax2.set_title("Estimated $\\theta_0$", fontsize=10)
-        ax3.set_title("Estimated $\\theta_1$", fontsize=10)
-        ax4.set_title("Estimated $\\theta_2$", fontsize=10)
-        ax5.set_title("Estimated $\\theta_3$", fontsize=10)
+        for j in range(N_BANDITS):
+            axes[j].fill_between(
+                posterior_anim_dict[j][i]["X"],
+                0,
+                posterior_anim_dict[j][i]["curve"],
+                color=bandit_colors[j],
+                alpha=0.7,
+            )
+            axes[j].set_title(f"Estimated $p_{j+1}$", fontsize=10)
 
         # do not need to return
         return ()
@@ -227,6 +181,8 @@ def plot_MAB_experiment(
 
     # fixing the layout
     fig.tight_layout()
+
+    print(f"Total regret: {total_regret}")
 
     if video:
         return HTML(anim.to_html5_video())
