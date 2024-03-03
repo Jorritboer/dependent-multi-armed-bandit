@@ -19,15 +19,17 @@ class MAB:
 
 
 # %%
-v1 = 0.5
+v1 = 0.35
 v2 = 0.2
+v3 = 0.3
 
-bandit_probs = [v1, v1 + v2, v2, 0.7 * v1 + v2]
+bandit_probs = [2 * v1 - v3, v1 + v3, v2, 0.5 * v3 + v2 + v1]
 # bandit_probs = [v1, v1 + v2, v2, 0.7 * v1 + v2]
 mab = MAB(bandit_probs)
 
 v1 = cp.Variable()
 v2 = cp.Variable()
+v3 = cp.Variable()
 
 p1max = cp.Parameter()
 p1min = cp.Parameter()
@@ -38,10 +40,10 @@ p3min = cp.Parameter()
 p4max = cp.Parameter()
 p4min = cp.Parameter()
 
-eq1 = v1
-eq2 = v1 + v2
+eq1 = 2 * v1 - v3
+eq2 = v1 + v3
 eq3 = v2
-eq4 = 0.7 * v1 + v2
+eq4 = 0.5 * v3 + v2 + v1
 
 constraints = [
     v1 >= 0,
@@ -129,27 +131,79 @@ def choose_bandit(k_array, reward_array, n_bandits):
     )
 
 
+# dependent UCB
+# variant that rounds to 3 decimals and picks random on tie
+def choose_bandit_B(k_array, reward_array, n_bandits):
+    success_count = reward_array.sum(axis=1)
+    total_count = k_array.sum(axis=1)
+
+    # try out each arm once, and avoid dividing by 0 below
+    for k in range(n_bandits):
+        if total_count[k] == 0:
+            return k
+
+    success_ratio = success_count / total_count
+
+    sqrt_term = np.sqrt(np.log(2 * np.sum(total_count)) / total_count)
+
+    dep_bounds = dep_max_est(success_ratio, sqrt_term)
+
+    def print_info():
+        print(f"r{int(sum(total_count))}:")
+        print(
+            f"\t ub [{round((success_ratio - sqrt_term)[0],2)},{round((success_ratio)[0],2)},{round((success_ratio+sqrt_term)[0],5)}] \t dep_ub {round(dep_bounds[0],5)} \t diff? {(dep_bounds[0] < (success_ratio + sqrt_term)[0])}"
+        )
+        print(
+            f"\t ub [{round((success_ratio - sqrt_term)[1],2)},{round((success_ratio)[1],2)},{round((success_ratio+sqrt_term)[1],5)}] \t dep_ub {round(dep_bounds[1],5)} \t diff? {(dep_bounds[1] < (success_ratio + sqrt_term)[1])}"
+        )
+        print(
+            f"\t ub [{round((success_ratio - sqrt_term)[2],2)},{round((success_ratio)[2],2)},{round((success_ratio+sqrt_term)[2],5)}] \t dep_ub {round(dep_bounds[2],5)} \t diff? {(dep_bounds[2] < (success_ratio + sqrt_term)[2])}"
+        )
+        c1 = (
+            np.argmax(
+                [
+                    min((success_ratio + sqrt_term)[i], dep_bounds[i])
+                    for i in range(n_bandits)
+                ]
+            )
+            + 1
+        )
+        c2 = np.argmax(success_ratio + sqrt_term) + 1
+        print(f"Choice: {c1} =? {c2}: {c1==c2} ")
+        print("--------------------------------------------------")
+
+    # print_info()
+
+    # return np.argmax(success_ratio + sqrt_term)
+    upper_bounds = [
+        min(1, (success_ratio + sqrt_term)[i], round(dep_bounds[i], 3))
+        for i in range(n_bandits)
+    ]
+    return np.random.choice(np.flatnonzero(upper_bounds == np.max(upper_bounds)))
+
+
 def random_policy(k_array, reward_array, n_bandits):
     return np.random.choice(range(n_bandits), 1)[0]
 
 
 # %%
 plot.plot_MAB_experiment(
-    choose_bandit, mab, 1000, bandit_probs, "Dependent UCB", graph=False, video=False
+    choose_bandit_B, mab, 1000, bandit_probs, "Dependent UCB", graph=False, video=False
 )
 
 
 # %%
 algorithms = {
     # "random": random_policy,
-    "e_greedy": policies.eGreedyPolicy(0.1).choose_bandit,
-    "ucb": policies.UCBPolicy().choose_bandit,
+    # "e_greedy": policies.eGreedyPolicy(0.1).choose_bandit,
+    # "ucb": policies.UCBPolicy().choose_bandit,
     "ts": policies.TSPolicy().choose_bandit,
-    "ucb-B": policies.UCBPolicyB().choose_bandit,
+    # "ucb-B": policies.UCBPolicyB().choose_bandit,
     "ucb-C": policies.UCBPolicyC().choose_bandit,
-    "ucb-dependent": choose_bandit,
+    # "ucb-dependent": choose_bandit,
+    "ucb-dependent-B": choose_bandit_B,
 }
 
-simulation(mab, algorithms, 1000, 5)
+simulation(mab, algorithms, 3000, 5)
 
 # %%
