@@ -97,6 +97,32 @@ def choose_bandit(k_array, reward_array, n_bandits):
 
     dep_bounds = dep_max_est(success_ratio, sqrt_term)
 
+    def print_info():
+        print(f"r{int(sum(total_count))}:")
+        print(
+            f"\t ub [{round((success_ratio - sqrt_term)[0],2)},{round((success_ratio)[0],2)},{round((success_ratio+sqrt_term)[0],5)}] \t dep_ub {round(dep_bounds[0],5)} \t diff? {(dep_bounds[0] < (success_ratio + sqrt_term)[0])}"
+        )
+        print(
+            f"\t ub [{round((success_ratio - sqrt_term)[1],2)},{round((success_ratio)[1],2)},{round((success_ratio+sqrt_term)[1],5)}] \t dep_ub {round(dep_bounds[1],5)} \t diff? {(dep_bounds[1] < (success_ratio + sqrt_term)[1])}"
+        )
+        print(
+            f"\t ub [{round((success_ratio - sqrt_term)[2],2)},{round((success_ratio)[2],2)},{round((success_ratio+sqrt_term)[2],5)}] \t dep_ub {round(dep_bounds[2],5)} \t diff? {(dep_bounds[2] < (success_ratio + sqrt_term)[2])}"
+        )
+        c1 = (
+            np.argmax(
+                [
+                    min((success_ratio + sqrt_term)[i], dep_bounds[i])
+                    for i in range(n_bandits)
+                ]
+            )
+            + 1
+        )
+        c2 = np.argmax(success_ratio + sqrt_term) + 1
+        print(f"Choice: {c1} =? {c2}: {c1==c2} ")
+        print("--------------------------------------------------")
+
+    # print_info()
+
     # return np.argmax(success_ratio + sqrt_term)
     return np.argmax(
         [min((success_ratio + sqrt_term)[i], dep_bounds[i]) for i in range(n_bandits)]
