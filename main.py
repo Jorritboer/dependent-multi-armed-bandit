@@ -19,17 +19,15 @@ class MAB:
 
 
 # %%
-v1 = 0.35
+v1 = 0.5
 v2 = 0.2
-v3 = 0.3
 
-bandit_probs = [2 * v1 - v3, v1 + v3, v2, 0.5 * v3 + v2 + v1]
-# bandit_probs = [v1, v1 + v2, v2, 0.7 * v1 + v2]
+bandit_probs = [v1, v1 + v2, v2, 0.7 * v1 + v2]
 mab = MAB(bandit_probs)
 
 v1 = cp.Variable()
 v2 = cp.Variable()
-v3 = cp.Variable()
+# v3 = cp.Variable()
 
 p1max = cp.Parameter()
 p1min = cp.Parameter()
@@ -40,10 +38,10 @@ p3min = cp.Parameter()
 p4max = cp.Parameter()
 p4min = cp.Parameter()
 
-eq1 = 2 * v1 - v3
-eq2 = v1 + v3
+eq1 = v1
+eq2 = v1 + v2
 eq3 = v2
-eq4 = 0.5 * v3 + v2 + v1
+eq4 = 0.7 * v1 + v2
 
 constraints = [
     v1 >= 0,
@@ -67,6 +65,7 @@ prob4 = cp.Problem(cp.Maximize(eq4), constraints)
 
 
 def dep_max_est(estimators, bound):
+    # print(estimators, bound)
     p1min.value = estimators[0] - bound[0]
     p1max.value = estimators[0] + bound[0]
     p2min.value = estimators[1] - bound[1]
@@ -182,13 +181,91 @@ def choose_bandit_B(k_array, reward_array, n_bandits):
     return np.random.choice(np.flatnonzero(upper_bounds == np.max(upper_bounds)))
 
 
+# UCB2
+class UCBPolicy2_dependent:
+
+    # if we're currently playing a bandit, this variable will indicate which
+    playing_bandit = None
+    # indicating how many times left to play
+    playing_times = None
+
+    # initializing
+    def __init__(self, alpha, n_bandits):
+        self.alpha = alpha
+        self.r = np.array([0] * n_bandits)
+        pass
+
+    # choice of bandit
+    def choose_bandit(self, k_array, reward_array, n_bandits):
+        success_count = reward_array.sum(axis=1)
+        total_count = k_array.sum(axis=1)
+
+        # try out each arm once, and avoid dividing by 0 below
+        for k in range(n_bandits):
+            if total_count[k] == 0:
+                # also reset (this is a bit of a hack to solve a problem for running multiple simulations)
+                self.r = np.array([0] * n_bandits)
+                self.playing_bandit = None
+                self.playing_times = None
+                return k
+
+        if self.playing_bandit and self.playing_times > 0:
+            bandit = self.playing_bandit
+            self.playing_times -= 1
+            # if we're done playing, set to None
+            if self.playing_times == 0:
+                self.playing_bandit = None
+            return bandit
+
+        success_ratio = success_count / total_count
+
+        # max(0,.) added to prevent negative roots
+        sqrt_term = np.sqrt(
+            (1 + self.alpha)
+            * np.maximum(
+                0,
+                np.log(
+                    np.e * np.sum(total_count) / (np.ceil((1 + self.alpha) ** self.r))
+                ),
+            )
+            / (2 * np.ceil((1 + self.alpha) ** self.r))
+        )
+
+        dep_bounds = dep_max_est(success_ratio, sqrt_term)
+
+        upper_bounds = [
+            min(1, (success_ratio + sqrt_term)[i], round(dep_bounds[i], 3))
+            for i in range(n_bandits)
+        ]
+
+        bandit = np.random.choice(np.flatnonzero(upper_bounds == np.max(upper_bounds)))
+
+        self.playing_bandit = bandit
+        self.playing_times = np.ceil(
+            (1 + self.alpha) ** (self.r[bandit] + 1)
+        ) - np.ceil((1 + self.alpha) ** self.r[bandit])
+        # print(f"Playing bandit {bandit} {self.playing_times} times")
+        # - 1 because we play it once immediately
+        self.playing_times -= 1
+        self.r[bandit] += 1
+
+        return bandit
+
+
 def random_policy(k_array, reward_array, n_bandits):
     return np.random.choice(range(n_bandits), 1)[0]
 
 
 # %%
 plot.plot_MAB_experiment(
-    choose_bandit_B, mab, 1000, bandit_probs, "Dependent UCB", graph=False, video=False
+    UCBPolicy2_dependent(0.1, len(bandit_probs)).choose_bandit,
+    # choose_bandit_B,
+    mab,
+    1000,
+    bandit_probs,
+    "UCB2",
+    graph=False,
+    video=False,
 )
 
 
@@ -199,11 +276,15 @@ algorithms = {
     # "ucb": policies.UCBPolicy().choose_bandit,
     "ts": policies.TSPolicy().choose_bandit,
     # "ucb-B": policies.UCBPolicyB().choose_bandit,
-    "ucb-C": policies.UCBPolicyC().choose_bandit,
+    # "ucb-C": policies.UCBPolicyC().choose_bandit,
     # "ucb-dependent": choose_bandit,
-    "ucb-dependent-B": choose_bandit_B,
+    # "ucb-dependent-B": choose_bandit_B,
+    "ucb2(0.5)": policies.UCBPolicy2(0.5, len(bandit_probs)).choose_bandit,
+    "ucb_dep2(.5)": UCBPolicy2_dependent(0.5, len(bandit_probs)).choose_bandit,
+    "ucb2(0.9)": policies.UCBPolicy2(0.9, len(bandit_probs)).choose_bandit,
+    "ucb_dep2(.9)": UCBPolicy2_dependent(0.9, len(bandit_probs)).choose_bandit,
 }
 
-simulation(mab, algorithms, 3000, 5)
+simulation(mab, algorithms, 2000, 20)
 
 # %%
