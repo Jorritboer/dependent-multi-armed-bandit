@@ -54,11 +54,11 @@ def simulation(mab, policies, n_rounds=1000, n_simulations=1000):
     # opening figure to plot regret
     plt.figure(figsize=(10, 3), dpi=150)
 
-    NUM_COLORS = len(policies.items())
-    cm = plt.get_cmap("inferno")
-    plt.gca().set_prop_cycle(
-        color=[cm(1.0 * i / NUM_COLORS) for i in range(NUM_COLORS)]
-    )
+    # NUM_COLORS = len(policies.items())
+    # cm = plt.get_cmap("inferno")
+    # plt.gca().set_prop_cycle(
+    #     color=[cm(1.0 * i / NUM_COLORS) for i in range(NUM_COLORS)]
+    # )
 
     # loop for each decision policy
     for policy in policies.keys():
