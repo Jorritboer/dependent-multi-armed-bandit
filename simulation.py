@@ -3,7 +3,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
-def simulation(mab, policies, n_rounds=1000, n_simulations=1000):
+def simulation(mab, policies, n_rounds=1000, n_simulations=1000, plot_reward=False):
     n_bandits = len(mab.bandit_probs)
     n_policies = len(policies.keys())
 
@@ -64,10 +64,22 @@ def simulation(mab, policies, n_rounds=1000, n_simulations=1000):
     for policy in policies.keys():
 
         # plotting data
+        color = next(plt.gca()._get_lines.prop_cycler)["color"]
+        if plot_reward:
+            plt.plot(
+                np.cumsum(
+                    np.sum(results_dict[policy]["reward_array"], axis=0) / n_simulations
+                ),
+                "--",
+                label=f"{policy}-reward",
+                linewidth=1.5,
+                color=color,
+            )
         plt.plot(
             np.cumsum(results_dict[policy]["regret_array"] / n_simulations),
             label=policy,
             linewidth=1.5,
+            color=color,
         )
 
     # adding title
@@ -93,7 +105,7 @@ def simulation(mab, policies, n_rounds=1000, n_simulations=1000):
     plt.figure(figsize=(10, 3), dpi=150)
 
     # colors for each bandit
-    bandit_colors = ["red", "green", "blue", "purple"]
+    bandit_colors = ["red", "green", "blue", "purple"] * 4
 
     # loop for each decision policy
     for i, policy in enumerate(policies.keys()):
