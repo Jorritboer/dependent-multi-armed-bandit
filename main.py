@@ -19,44 +19,25 @@ class MAB:
 
 
 # %%
-v1 = 0.3
+v1 = 0.5
 v2 = 0.2
-v3 = 0.1
 
-bandit_probs = [
-    v1,
-    v2,
-    v3,
-    v1 + v2,
-    v1 + v3,
-    v2 + v3,
-    v1 + v2 + v3,
-    -0.2 * v1 + 0.8 * v2 + 0.5 * v3,
-]
+bandit_probs = [v1, v1 + v2, v2, 0.7 * v1 + v2]
 
 mab = MAB(bandit_probs)
 
 v1 = cp.Variable()
 v2 = cp.Variable()
-v2 = cp.Variable()
-variables = [v1, v2, v3]
-bandit_expressions = [
-    v1,
-    v2,
-    v3,
-    v1 + v2,
-    v1 + v3,
-    v2 + v3,
-    v1 + v2 + v3,
-    -0.2 * v1 + 0.8 * v2 + 0.5 * v3,
-]
+# v3 = cp.Variable()
+variables = [v1, v2]
+bandit_expressions = [v1, v1 + v2, v2, 0.7 * v1 + v2]
 
 
 # %%
 plot.plot_MAB_experiment(
     policies.UCBPolicy2_dependent(0.5, variables, bandit_expressions).choose_bandit,
     mab,
-    2000,
+    1000,
     bandit_probs,
     "UCB2 dependent",
     video=False,
@@ -64,8 +45,8 @@ plot.plot_MAB_experiment(
 
 # %%
 algorithms = {
-    "random": policies.RandomPolicy().choose_bandit,
-    "e_greedy": policies.eGreedyPolicy(0.1).choose_bandit,
+    # "random": policies.RandomPolicy().choose_bandit,
+    # "e_greedy": policies.eGreedyPolicy(0.1).choose_bandit,
     # "ucb": policies.UCBPolicy().choose_bandit,
     # "ts": policies.TSPolicy().choose_bandit,
     # "ucb-B": policies.UCBPolicyB().choose_bandit,
@@ -80,12 +61,8 @@ algorithms = {
     "ucb_dep2(0.5)": policies.UCBPolicy2_dependent(
         0.5, variables, bandit_expressions
     ).choose_bandit,
-    # "ucb2(0.9)": policies.UCBPolicy2(0.9, len(bandit_probs)).choose_bandit,
-    # "ucb_dep2(0.9)": policies.UCBPolicy2_dependent(
-    #     0.9, variables, bandit_expressions
-    # ).choose_bandit,
 }
 
-simulation(mab, algorithms, 1000, 5, plot_reward=True)
+simulation(mab, algorithms, 1000, 5, plot_reward=False)
 
 # %%
