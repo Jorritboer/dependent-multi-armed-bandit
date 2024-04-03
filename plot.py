@@ -34,7 +34,14 @@ def plot_graph(graph_ax, k_array, reward_array):
     success_ratio = success_count / total_count
 
     # computing square root term
-    sqrt_term = np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
+    # sqrt_term = np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
+    vars = np.sum(reward_array**2, axis=1) / total_count - (success_ratio**2)
+    V = vars + np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
+
+    # computing square root term
+    sqrt_term = np.sqrt(
+        (np.log(np.sum(total_count)) / total_count) * np.minimum(0.25, V)
+    )
 
     graph_ax.set_xlim([-0.5, 1.5])
     graph_ax.set_ylim([-0.5, 1.5])
@@ -45,21 +52,21 @@ def plot_graph(graph_ax, k_array, reward_array):
     # p1 = x
     graph_ax.plot(
         [success_ratio[0] - sqrt_term[0], success_ratio[0] - sqrt_term[0]],
-        [-1, 2],
+        [-0.5, 1.5],
         "-",
         linewidth=1,
         color=bandit_colors[0],
     )
     graph_ax.plot(
         [success_ratio[0], success_ratio[0]],
-        [-1, 2],
+        [-0.5, 1.5],
         "--",
         linewidth=1,
         color=bandit_colors[0],
     )
     graph_ax.plot(
         [success_ratio[0] + sqrt_term[0], success_ratio[0] + sqrt_term[0]],
-        [-1, 2],
+        [-0.5, 1.5],
         "-",
         linewidth=1,
         color=bandit_colors[0],
@@ -111,13 +118,12 @@ def plot_graph(graph_ax, k_array, reward_array):
         color=bandit_colors[2],
     )
     # p4 = 0.7 * x + y
-    # p4 = 1.2 * x + 0.5 * y
     color = next(plt.gca()._get_lines.prop_cycler)["color"]
     graph_ax.plot(
         [-0.5, 1.5],
         [
-            2*(success_ratio[3] - sqrt_term[3] + 1.2 * 0.5),
-            2*(success_ratio[3] - sqrt_term[3] - 1.2 * 1.5),
+            success_ratio[3] - sqrt_term[3] + 0.7 * 0.5,
+            success_ratio[3] - sqrt_term[3] - 0.7 * 1.5,
         ],
         "-",
         linewidth=1,
@@ -125,7 +131,7 @@ def plot_graph(graph_ax, k_array, reward_array):
     )
     graph_ax.plot(
         [-0.5, 1.5],
-        [2*(success_ratio[3] + 1.2 * 0.5), 2*(success_ratio[3] - 1.2 * 1.5)],
+        [success_ratio[3] + 0.7 * 0.5, success_ratio[3] - 0.7 * 1.5],
         "--",
         linewidth=1,
         color=bandit_colors[3],
@@ -133,8 +139,8 @@ def plot_graph(graph_ax, k_array, reward_array):
     graph_ax.plot(
         [-0.5, 1.5],
         [
-            2*(success_ratio[3] + sqrt_term[3] + 1.2 * 0.5),
-            2*(success_ratio[3] + sqrt_term[3] - 1.2 * 1.5),
+            success_ratio[3] + sqrt_term[3] + 0.7 * 0.5,
+            success_ratio[3] + sqrt_term[3] - 0.7 * 1.5,
         ],
         "-",
         linewidth=1,
