@@ -26,6 +26,11 @@ class eGreedyPolicy:
         success_count = reward_array.sum(axis=1)
         total_count = k_array.sum(axis=1)
 
+        # try out each arm once, and avoid dividing by 0 below
+        for k in range(n_bandits):
+            if total_count[k] == 0:
+                return k
+
         # ratio of sucesses vs total
         success_ratio = success_count / total_count
 
@@ -59,6 +64,11 @@ class UCBPolicy:
         success_count = reward_array.sum(axis=1)
         total_count = k_array.sum(axis=1)
 
+        # try out each arm once, and avoid dividing by 0 below
+        for k in range(n_bandits):
+            if total_count[k] == 0:
+                return k
+
         # ratio of sucesses vs total
         success_ratio = success_count / total_count
 
@@ -84,6 +94,11 @@ class UCBPolicyB:
         # sucesses and total draws
         success_count = reward_array.sum(axis=1)
         total_count = k_array.sum(axis=1)
+
+        # try out each arm once, and avoid dividing by 0 below
+        for k in range(n_bandits):
+            if total_count[k] == 0:
+                return k
 
         # ratio of sucesses vs total
         success_ratio = success_count / total_count
@@ -116,6 +131,11 @@ class UCBPolicyC:
 
         # ratio of sucesses vs total
         success_ratio = success_count / total_count
+
+        # try out each arm once, and avoid dividing by 0 below
+        for k in range(n_bandits):
+            if total_count[k] == 0:
+                return k
 
         # computing square root term
         sqrt_term = np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
@@ -429,7 +449,7 @@ class UCB_DependentB:
 
         success_ratio = success_count / total_count
 
-        sqrt_term = np.sqrt(np.log(2 * np.sum(total_count)) / total_count)
+        sqrt_term = np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
 
         dep_bounds = self.dep_max_est(success_ratio, sqrt_term)
 
