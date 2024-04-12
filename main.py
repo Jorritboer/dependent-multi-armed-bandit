@@ -19,10 +19,10 @@ class MAB:
 
 
 # %%
-v1 = 0.5
-v2 = 0.2
+v1 = 0.4
+v2 = 0.3
 
-bandit_probs = [v1, v1 + v2, v2, 0.7 * v1 + v2]
+bandit_probs = [1.2 * v1, v1 + v2 - 0.15, v2 + 0.10, 0.6 * v1 + 0.7 * v2 + 0.20]
 
 mab = MAB(bandit_probs)
 
@@ -30,18 +30,18 @@ v1 = cp.Variable()
 v2 = cp.Variable()
 # v3 = cp.Variable()
 variables = [v1, v2]
-bandit_expressions = [v1, v1 + v2, v2, 0.7 * v1 + v2]
+bandit_expressions = [1.2 * v1, v1 + v2 - 0.15, v2 + 0.10, 0.6 * v1 + 0.7 * v2 + 0.20]
 
 
 # %%
 plot.plot_MAB_experiment(
-    policies.UCBPolicyTuned().choose_bandit,
+    policies.UCBPolicyTuned_Dependent(variables, bandit_expressions).choose_bandit,
     mab,
-    1000,
+    250,
     bandit_probs,
-    "UCB1 tuned",
-    video=False,
-    graph=False,
+    "UCB1 tuned dependent",
+    video=True,
+    graph=True,
 )
 
 # %%
@@ -52,10 +52,6 @@ algorithms = {
     "ts": policies.TSPolicy().choose_bandit,
     # "ucb-B": policies.UCBPolicyB().choose_bandit,
     # "ucb-C": policies.UCBPolicyC().choose_bandit,
-    "ucb-tuned": policies.UCBPolicyTuned().choose_bandit,
-    "ucb-tuned_dep": policies.UCBPolicyTuned_Dependent(
-        variables, bandit_expressions
-    ).choose_bandit,
     # "ucb-dependent": policies.UCB_Dependent(
     #     variables, bandit_expressions
     # ).choose_bandit,
@@ -63,11 +59,15 @@ algorithms = {
     #     variables, bandit_expressions
     # ).choose_bandit,
     "ucb2(0.5)": policies.UCBPolicy2(0.5, len(bandit_probs)).choose_bandit,
-    "ucb2_dep(0.5)": policies.UCBPolicy2_dependent(
-        0.5, variables, bandit_expressions
-    ).choose_bandit,
+    # "ucb2_dep(0.5)": policies.UCBPolicy2_dependent(
+    #     0.5, variables, bandit_expressions
+    # ).choose_bandit,
+    # "ucb-tuned": policies.UCBPolicyTuned().choose_bandit,
+    # "ucb-tuned_dep": policies.UCBPolicyTuned_Dependent(
+    #     variables, bandit_expressions
+    # ).choose_bandit,
 }
 
-simulation(mab, algorithms, 5000, 10, plot_reward=False)
+simulation(mab, algorithms, 10000, 10, plot_reward=False, plot_uncertainty=True)
 
 # %%

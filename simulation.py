@@ -3,7 +3,14 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
-def simulation(mab, policies, n_rounds=1000, n_simulations=1000, plot_reward=False):
+def simulation(
+    mab,
+    policies,
+    n_rounds=1000,
+    n_simulations=1000,
+    plot_reward=False,
+    plot_uncertainty=False,
+):
     n_bandits = len(mab.bandit_probs)
     n_policies = len(policies.keys())
 
@@ -12,7 +19,7 @@ def simulation(mab, policies, n_rounds=1000, n_simulations=1000, plot_reward=Fal
         policy: {
             "k_array": np.zeros((n_bandits, n_rounds)),
             "reward_array": np.zeros((n_bandits, n_rounds)),
-            "regret_array": np.zeros((1, n_rounds))[0],
+            "regret_array": np.zeros((n_simulations, n_rounds)),
         }
         for policy in policies.keys()
     }
@@ -46,7 +53,7 @@ def simulation(mab, policies, n_rounds=1000, n_simulations=1000, plot_reward=Fal
             # results for the simulation
             results_dict[key]["k_array"] += k_array
             results_dict[key]["reward_array"] += reward_array
-            results_dict[key]["regret_array"] += regret_array
+            results_dict[key]["regret_array"][simulation] = regret_array
 
     # closing all past figures
     plt.close("all")
@@ -75,12 +82,35 @@ def simulation(mab, policies, n_rounds=1000, n_simulations=1000, plot_reward=Fal
                 linewidth=1.5,
                 color=color,
             )
+        cumulative_sum = np.cumsum(results_dict[policy]["regret_array"], axis=1)
+
+        std = np.std(cumulative_sum, axis=0)
+        cumulative_sum = np.sum(cumulative_sum, axis=0) / n_simulations
+
         plt.plot(
-            np.cumsum(results_dict[policy]["regret_array"] / n_simulations),
+            cumulative_sum,
             label=policy,
             linewidth=1.5,
             color=color,
         )
+        if plot_uncertainty:
+            plt.fill_between(
+                range(n_rounds),
+                cumulative_sum - std,
+                cumulative_sum + std,
+                color=color,
+                alpha=0.2,
+            )
+            plt.plot(
+                cumulative_sum + std,
+                ",",
+                color=color,
+            )
+            plt.plot(
+                cumulative_sum - std,
+                ",",
+                color=color,
+            )
 
     # adding title
     plt.title(
