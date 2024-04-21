@@ -55,6 +55,9 @@ algorithms = {
     "e_greedy_decaying": eGreedyPolicyDecaying(
         lin_decaying(0.75, 0.005, 500)
     ).choose_bandit,
+    "e_greedy_decaying_ucb_tuned_dep": eGreedyPolicyDecayingUCBTunedDependent(
+        variables, bandit_expressions, lin_decaying(0.75, 0.00, 200)
+    ).choose_bandit,
     # "ucb": UCBPolicy().choose_bandit,
     "ts": TSPolicy().choose_bandit,
     # "ucb-B": UCBPolicyB().choose_bandit,

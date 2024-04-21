@@ -1,5 +1,6 @@
 from .eGreedyPolicy import *
 from .eGreedyPolicyDecaying import *
+from .eGreedyPolicyDecayingUCBTunedDependent import *
 from .RandomPolicy import *
 from .TSPolicy import *
 from .UCBDependent import *
