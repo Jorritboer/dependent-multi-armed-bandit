@@ -9,7 +9,6 @@ def simulation(
     n_rounds=1000,
     n_simulations=1000,
     plot_reward=False,
-    plot_uncertainty=False,
 ):
     n_bandits = len(mab.bandit_probs)
     n_policies = len(policies.keys())
@@ -58,77 +57,83 @@ def simulation(
     # closing all past figures
     plt.close("all")
 
-    # opening figure to plot regret
-    plt.figure(figsize=(10, 3), dpi=150)
+    def plot_regret(plot_uncertainty):
+        # opening figure to plot regret
+        plt.figure(figsize=(10, 3), dpi=150)
 
-    # NUM_COLORS = len(policies.items())
-    # cm = plt.get_cmap("inferno")
-    # plt.gca().set_prop_cycle(
-    #     color=[cm(1.0 * i / NUM_COLORS) for i in range(NUM_COLORS)]
-    # )
+        # NUM_COLORS = len(policies.items())
+        # cm = plt.get_cmap("inferno")
+        # plt.gca().set_prop_cycle(
+        #     color=[cm(1.0 * i / NUM_COLORS) for i in range(NUM_COLORS)]
+        # )
 
-    # loop for each decision policy
-    for policy in policies.keys():
+        # loop for each decision policy
+        for policy in policies.keys():
 
-        # plotting data
-        color = next(plt.gca()._get_lines.prop_cycler)["color"]
-        if plot_reward:
+            # plotting data
+            color = next(plt.gca()._get_lines.prop_cycler)["color"]
+            if plot_reward:
+                plt.plot(
+                    np.cumsum(
+                        np.sum(results_dict[policy]["reward_array"], axis=0)
+                        / n_simulations
+                    ),
+                    "--",
+                    label=f"{policy}-reward",
+                    linewidth=1.5,
+                    color=color,
+                )
+            cumulative_sum = np.cumsum(results_dict[policy]["regret_array"], axis=1)
+
+            std = np.std(cumulative_sum, axis=0)
+            cumulative_sum = np.sum(cumulative_sum, axis=0) / n_simulations
+
             plt.plot(
-                np.cumsum(
-                    np.sum(results_dict[policy]["reward_array"], axis=0) / n_simulations
-                ),
-                "--",
-                label=f"{policy}-reward",
+                cumulative_sum,
+                label=policy,
                 linewidth=1.5,
                 color=color,
             )
-        cumulative_sum = np.cumsum(results_dict[policy]["regret_array"], axis=1)
+            if plot_uncertainty:
+                plt.fill_between(
+                    range(n_rounds),
+                    cumulative_sum - std,
+                    cumulative_sum + std,
+                    color=color,
+                    alpha=0.2,
+                )
+                plt.plot(
+                    cumulative_sum + std,
+                    ",",
+                    color=color,
+                )
+                plt.plot(
+                    cumulative_sum - std,
+                    ",",
+                    color=color,
+                )
 
-        std = np.std(cumulative_sum, axis=0)
-        cumulative_sum = np.sum(cumulative_sum, axis=0) / n_simulations
-
-        plt.plot(
-            cumulative_sum,
-            label=policy,
-            linewidth=1.5,
-            color=color,
+        # adding title
+        plt.title(
+            "Comparison of cumulative regret for each method in {} simulations".format(
+                n_simulations
+            ),
+            fontsize=10,
         )
-        if plot_uncertainty:
-            plt.fill_between(
-                range(n_rounds),
-                cumulative_sum - std,
-                cumulative_sum + std,
-                color=color,
-                alpha=0.2,
-            )
-            plt.plot(
-                cumulative_sum + std,
-                ",",
-                color=color,
-            )
-            plt.plot(
-                cumulative_sum - std,
-                ",",
-                color=color,
-            )
 
-    # adding title
-    plt.title(
-        "Comparison of cumulative regret for each method in {} simulations".format(
-            n_simulations
-        ),
-        fontsize=10,
-    )
+        # adding legend
+        plt.legend(fontsize=8)
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
 
-    # adding legend
-    plt.legend(fontsize=8)
-    plt.xticks(fontsize=10)
-    plt.yticks(fontsize=10)
+        # showing plot
+        plt.show()
 
-    # showing plot
-    plt.show()
-
-    # closing all past figures
+    # plot regret without uncertainty
+    plot_regret(plot_uncertainty=False)
+    plt.close("all")
+    # plot regret with uncertainty
+    plot_regret(plot_uncertainty=True)
     plt.close("all")
 
     # opening figure to plot regret

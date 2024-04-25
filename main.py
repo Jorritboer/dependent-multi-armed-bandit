@@ -37,7 +37,9 @@ bandit_expressions = [v1, v1 + v2, v2, 0.7 * v1 + v2]
 
 # %%
 plot.plot_MAB_experiment(
-    DerivativeExplorePolicy(variables, bandit_expressions, lin_decaying(0.75, 0, 50)),
+    DerivativeExplorePolicy(
+        variables, bandit_expressions, lin_decaying(0.75, 0, 50)
+    ).choose_bandit,
     mab,
     200,
     bandit_probs,
@@ -55,12 +57,12 @@ algorithms = {
     # "e_greedy_decaying": eGreedyPolicyDecaying(
     #     lin_decaying(0.75, 0.005, 200)
     # ).choose_bandit,
-    "e_greedy_decaying_ucb_tuned_dep": eGreedyPolicyDecayingUCBTunedDependent(
-        variables, bandit_expressions, lin_decaying(0.75, 0, 200)
-    ).choose_bandit,
-    "DerivativeExplore": DerivativeExplorePolicy(
-        variables, bandit_expressions, lin_decaying(0.75, 0, 200)
-    ).choose_bandit,
+    # "e_greedy_decaying_ucb_tuned_dep": eGreedyPolicyDecayingUCBTunedDependent(
+    #     variables, bandit_expressions, lin_decaying(0.75, 0, 200)
+    # ).choose_bandit,
+    # "DerivativeExplore": DerivativeExplorePolicy(
+    #     variables, bandit_expressions, lin_decaying(0.75, 0, 200)
+    # ).choose_bandit,
     # "ucb": UCBPolicy().choose_bandit,
     "ts": TSPolicy().choose_bandit,
     # "ucb-B": UCBPolicyB().choose_bandit,
@@ -77,6 +79,6 @@ algorithms = {
     ).choose_bandit,
 }
 
-simulation(mab, algorithms, 3000, 6, plot_reward=False, plot_uncertainty=True)
+simulation(mab, algorithms, 100, 5, plot_reward=False)
 
 # %%
