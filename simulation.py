@@ -9,9 +9,13 @@ def simulation(
     n_rounds=1000,
     n_simulations=1000,
     plot_reward=False,
+    uncertainty=None,
 ):
     n_bandits = len(mab.bandit_probs)
     n_policies = len(policies.keys())
+
+    # we save the initial probs, so we can add uncertainty to this
+    base_probs = mab.bandit_probs[:]
 
     # dict storing results for each algorithm and simulation
     results_dict = {
@@ -36,6 +40,11 @@ def simulation(
             k_array = np.zeros((n_bandits, n_rounds))
             reward_array = np.zeros((n_bandits, n_rounds))
             regret_array = np.zeros((1, n_rounds))[0]
+
+            if uncertainty:
+                for i in range(n_bandits):
+                    e = np.random.uniform(-uncertainty, uncertainty)
+                    mab.bandit_probs[i] = max(min(base_probs[i] + e, 1), 0)
 
             # loop for each round
             for round_id in range(n_rounds):
