@@ -27,29 +27,25 @@ def simulation(
         for policy in policies.keys()
     }
 
-    # loop for each algorithm
-    for key, decision_policy in policies.items():
+    # loop for each simulation
+    for simulation in tqdm(range(n_simulations)):
 
-        # printing progress
-        print(key, decision_policy)
+        if uncertainty:
+            for i in range(n_bandits):
+                e = np.random.uniform(-uncertainty, uncertainty)
+                mab.bandit_probs[i] = max(min(base_probs[i] + e, 1), 0)
 
-        # loop for each simulation
-        for simulation in tqdm(range(n_simulations)):
-
+        # loop for each algorithm
+        for key, decision_policy in policies.items():
             # numpy arrays for accumulating draws, bandit choices and rewards, more efficient calculations
             k_array = np.zeros((n_bandits, n_rounds))
             reward_array = np.zeros((n_bandits, n_rounds))
             regret_array = np.zeros((1, n_rounds))[0]
 
-            if uncertainty:
-                for i in range(n_bandits):
-                    e = np.random.uniform(-uncertainty, uncertainty)
-                    mab.bandit_probs[i] = max(min(base_probs[i] + e, 1), 0)
-
             # loop for each round
-            for round_id in range(n_rounds):
+            for round_id in tqdm(range(n_rounds), desc=key, leave=False):
 
-                # choosing arm nad pulling it
+                # choosing arm and pulling it
                 k = decision_policy(k_array, reward_array, n_bandits)
                 reward, regret = mab.draw(k)
 
