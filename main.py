@@ -23,31 +23,29 @@ def lin_decaying(start, end, steps):
 
 
 # %%
-v1 = 0.1
-v2 = 0.2
-v3 = 0.3
-
-bandit_probs = [v1 + v2, v1 + v3, v2 + v3]
-mab = MAB(bandit_probs)
-
-v1 = cp.Variable()
-v2 = cp.Variable()
-v3 = cp.Variable()
-variables = [v1, v2, v3]
-bandit_expressions = [v1 + v2, v1 + v3, v2 + v3]
-# or list of np arrays?
-bandit_expressions_matrix = np.array(
+bandit_matrix = np.array(
     [
-        [[1], [1], [0]],
-        [[1], [0], [1]],
-        [[0], [1], [1]],
+        [1, 1, 0],
+        [1, 0, 1],
+        [0, 1, 1],
     ]
 )
+values = [0.1, 0.2, 0.3]
+
+bandit_probs = np.dot(bandit_matrix, values)
+mab = MAB(bandit_probs)
+
+# width of matrix determines nr of variables
+variables = [cp.Variable() for _ in range(len(bandit_matrix[0]))]
+bandit_expressions = np.dot(bandit_matrix, variables)
+
+# create column vectors
+column_vecs = [v.reshape(-1, 1) for v in bandit_matrix]
 
 
 # %%
 plot.plot_MAB_experiment(
-    LinUCB(1, bandit_expressions_matrix).choose_bandit,
+    LinUCB(1, column_vecs).choose_bandit,
     mab,
     200,
     bandit_probs,
@@ -72,7 +70,7 @@ algorithms = {
     #     variables, bandit_expressions, lin_decaying(0.75, 0, 200)
     # ).choose_bandit,
     # "ucb": UCBPolicy().choose_bandit,
-    # "ts": TSPolicy().choose_bandit,
+    "ts": TSPolicy().choose_bandit,
     # "ucb-B": UCBPolicyB().choose_bandit,
     # "ucb-C": UCBPolicyC().choose_bandit,
     # "ucb-dependent": UCBDependent(variables, bandit_expressions).choose_bandit,
@@ -82,12 +80,15 @@ algorithms = {
         0.5, variables, bandit_expressions
     ).choose_bandit,
     # "ucb-tuned": UCBPolicyTuned().choose_bandit,
-    # "ucb-tuned_dep": UCBPolicyTunedDependent(
+    "ucb-tuned_dep": UCBPolicyTunedDependent(
+        variables, bandit_expressions
+    ).choose_bandit,
+    # "ucb-tuned_dep2": UCBPolicyTunedDependent2(
     #     variables, bandit_expressions
     # ).choose_bandit,
-    "LinUCB": LinUCB(1, bandit_expressions_matrix).choose_bandit,
+    "LinUCB": LinUCB(1, column_vecs).choose_bandit,
 }
 
-simulation(mab, algorithms, 2000, 10, plot_reward=False)
+simulation(mab, algorithms, 2000, 5, plot_reward=False)
 
 # %%
