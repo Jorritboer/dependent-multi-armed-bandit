@@ -23,8 +23,8 @@ def lin_decaying(start, end, steps):
 
 
 # %%
-bandit_matrix = np.array([[1, 0], [1, 1], [0, 1], [0.7, 1]])
-values = [0.5, 0.2]
+bandit_matrix = np.array([[1, 0], [1, -1], [0, 1], [-0.4, 1.5]])
+values = [0.6, 0.5]
 
 bandit_probs = np.dot(bandit_matrix, values)
 mab = MAB(bandit_probs)
@@ -46,6 +46,9 @@ plot.plot_MAB_experiment(
     "LinUCB",
     video=True,
     graph=True,
+    column_vecs=column_vecs,
+    theta_values=values,
+    alpha=1,
 )
 
 

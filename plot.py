@@ -17,27 +17,15 @@ def get_beta_pdf(alpha, beta):
     return X, beta_dist(1 + alpha, 1 + beta).pdf(X)
 
 
-# hard coded for
-# [v1, v1 + v2, v2, 0.7 * v1 + v2]
-# i.e.
-# [x=p1, x+y=p2, y=p3, 0.7 * x + y=p4]
-column_vecs = [
-    np.array([[1.0], [0.0]]),
-    np.array([[1.0], [1.0]]),
-    np.array([[0.0], [1.0]]),
-    np.array([[0.7], [1.0]]),
-]
-THETA = [0.5, 0.2]
-
-
-def plot_graph(graph_ax, k_array, reward_array, k_list):
+def plot_graph(
+    graph_ax, k_array, reward_array, k_list, column_vecs, theta_values, alpha
+):
     success_count = reward_array.sum(axis=1)
     total_count = k_array.sum(axis=1)
 
-    # if not all bandits have been played don't make graph
-    for k in range(len(k_array)):
-        if total_count[k] == 0:
-            return
+    round = total_count.sum()
+    if round < 2:
+        return
 
     # ratio of sucesses vs total
     success_ratio = success_count / total_count
@@ -61,10 +49,10 @@ def plot_graph(graph_ax, k_array, reward_array, k_list):
     theta_t = np.dot(A_inv, b)
     graph_ax.scatter(theta_t[0], theta_t[1], color="black")
 
-    graph_ax.scatter(THETA[0], THETA[1], color="magenta")
+    graph_ax.scatter(theta_values[0], theta_values[1], color="magenta")
 
-    x = np.linspace(0, 1, 50)
-    y = np.linspace(0, 1, 50)
+    x = np.linspace(-0.5, 1.5, 65)
+    y = np.linspace(-0.5, 1.5, 65)
     x, y = np.meshgrid(x, y)
     a = A[0][0]
     b = A[0][1]
@@ -78,7 +66,7 @@ def plot_graph(graph_ax, k_array, reward_array, k_list):
             + d * (y - theta_t[1]) ** 2
             + (b + c) * ((x - theta_t[0]) ** 2) * ((y - theta_t[1]) ** 2)
         ),
-        [1],
+        [alpha],
         colors="black",
         linewidths=1,
     )
@@ -89,108 +77,42 @@ def plot_graph(graph_ax, k_array, reward_array, k_list):
     graph_ax.plot([1, 1], [0, 1], linewidth=1, color="black")
     graph_ax.plot([1, 0], [1, 1], linewidth=1, color="black")
     graph_ax.plot([0, 0], [1, 0], linewidth=1, color="black")
-    # p1 = x
-    graph_ax.plot(
-        [success_ratio[0] - sqrt_term[0], success_ratio[0] - sqrt_term[0]],
-        [-0.5, 1.5],
-        "-",
-        linewidth=1,
-        color=bandit_colors[0],
-    )
-    graph_ax.plot(
-        [success_ratio[0], success_ratio[0]],
-        [-0.5, 1.5],
-        "--",
-        linewidth=1,
-        color=bandit_colors[0],
-    )
-    graph_ax.plot(
-        [success_ratio[0] + sqrt_term[0], success_ratio[0] + sqrt_term[0]],
-        [-0.5, 1.5],
-        "-",
-        linewidth=1,
-        color=bandit_colors[0],
-    )
-    # p2 = x + y
-    color = next(plt.gca()._get_lines.prop_cycler)["color"]
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[1] - sqrt_term[1] + 0.5, success_ratio[1] - sqrt_term[1] - 1.5],
-        "-",
-        linewidth=1,
-        color=bandit_colors[1],
-    )
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[1] + 0.5, success_ratio[1] - 1.5],
-        "--",
-        linewidth=1,
-        color=bandit_colors[1],
-    )
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[1] + sqrt_term[1] + 0.5, success_ratio[1] + sqrt_term[1] - 1.5],
-        "-",
-        linewidth=1,
-        color=bandit_colors[1],
-    )
-    # p3 = y
-    color = next(plt.gca()._get_lines.prop_cycler)["color"]
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[2] - sqrt_term[2], success_ratio[2] - sqrt_term[2]],
-        "-",
-        linewidth=1,
-        color=bandit_colors[2],
-    )
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[2], success_ratio[2]],
-        "--",
-        linewidth=1,
-        color=bandit_colors[2],
-    )
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[2] + sqrt_term[2], success_ratio[2] + sqrt_term[2]],
-        "-",
-        linewidth=1,
-        color=bandit_colors[2],
-    )
-    # p4 = 0.7 * x + y
-    color = next(plt.gca()._get_lines.prop_cycler)["color"]
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [
-            success_ratio[3] - sqrt_term[3] + 0.7 * 0.5,
-            success_ratio[3] - sqrt_term[3] - 0.7 * 1.5,
-        ],
-        "-",
-        linewidth=1,
-        color=bandit_colors[3],
-    )
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [success_ratio[3] + 0.7 * 0.5, success_ratio[3] - 0.7 * 1.5],
-        "--",
-        linewidth=1,
-        color=bandit_colors[3],
-    )
-    graph_ax.plot(
-        [-0.5, 1.5],
-        [
-            success_ratio[3] + sqrt_term[3] + 0.7 * 0.5,
-            success_ratio[3] + sqrt_term[3] - 0.7 * 1.5,
-        ],
-        "-",
-        linewidth=1,
-        color=bandit_colors[3],
-    )
+
+    x = np.linspace(-0.5, 1.5, 10)
+    y = np.linspace(-0.5, 1.5, 10)
+    x, y = np.meshgrid(x, y)
+    for bandit in range(len(column_vecs)):
+        if int(total_count[bandit]) == 0:
+            continue
+
+        vector = column_vecs[bandit]
+        graph_ax.contour(
+            x,
+            y,
+            (vector[0][0] * x + vector[1][0] * y),
+            [
+                success_ratio[bandit] - sqrt_term[bandit],
+                success_ratio[bandit],
+                success_ratio[bandit] + sqrt_term[bandit],
+            ],
+            colors=bandit_colors[bandit],
+            linewidths=2,
+            linestyles=["-", "--", "-"],
+        )
 
 
 # let us wrap a function that draws the draws and distributions of the bandit experiment
 def plot_MAB_experiment(
-    decision_policy, mab, N_DRAWS, bandit_probs, plot_title, graph=True, video=False
+    decision_policy,
+    mab,
+    N_DRAWS,
+    bandit_probs,
+    plot_title,
+    graph=True,
+    video=False,
+    column_vecs=None,
+    theta_values=None,
+    alpha=None,
 ):
 
     # number of bandits
@@ -209,7 +131,7 @@ def plot_MAB_experiment(
 
     # opening figure
     if graph:
-        fig = plt.figure(figsize=(12, 5), dpi=150)
+        fig = plt.figure(figsize=(15, 5), dpi=150)
     else:
         fig = plt.figure(figsize=(9, 5), dpi=150)
 
@@ -225,7 +147,7 @@ def plot_MAB_experiment(
         ax5 = plt.subplot2grid((5, 6), (3, 3), rowspan=2)
         axes.append(ax5)
     if graph:
-        graph_ax = plt.subplot2grid((5, 6), (0, 4), colspan=2, rowspan=3)
+        graph_ax = plt.subplot2grid((5, 6), (0, 4), colspan=4, rowspan=5)
 
     total_regret = 0
     # loop generating draws
@@ -296,7 +218,9 @@ def plot_MAB_experiment(
         )
 
     if graph:
-        plot_graph(graph_ax, k_array, reward_array, k_list)
+        plot_graph(
+            graph_ax, k_array, reward_array, k_list, column_vecs, theta_values, alpha
+        )
 
     # titles
     # plt.title('Random draws from the row of slot machines (MAB)', fontsize=10)
@@ -317,6 +241,9 @@ def plot_MAB_experiment(
                 np.array([k_arr[:i] for k_arr in k_array]),
                 np.array([reward_arr[:i] for reward_arr in reward_array]),
                 k_list[:i],
+                column_vecs,
+                theta_values,
+                alpha,
             )
 
         # updating game rounds
