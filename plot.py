@@ -21,7 +21,16 @@ def get_beta_pdf(alpha, beta):
 # [v1, v1 + v2, v2, 0.7 * v1 + v2]
 # i.e.
 # [x=p1, x+y=p2, y=p3, 0.7 * x + y=p4]
-def plot_graph(graph_ax, k_array, reward_array):
+column_vecs = [
+    np.array([[1.0], [0.0]]),
+    np.array([[1.0], [1.0]]),
+    np.array([[0.0], [1.0]]),
+    np.array([[0.7], [1.0]]),
+]
+THETA = [0.5, 0.2]
+
+
+def plot_graph(graph_ax, k_array, reward_array, k_list):
     success_count = reward_array.sum(axis=1)
     total_count = k_array.sum(axis=1)
 
@@ -41,6 +50,37 @@ def plot_graph(graph_ax, k_array, reward_array):
     # computing square root term
     sqrt_term = np.sqrt(
         (np.log(np.sum(total_count)) / total_count) * np.minimum(0.25, V)
+    )
+
+    D = np.array([column_vecs[k].T[0] for k in k_list])
+    A = np.dot(D.T, D) + np.identity(2)
+    rewards = np.array(reward_array.sum(axis=0))
+    b = np.dot(rewards, D)
+
+    A_inv = np.linalg.inv(A)
+    theta_t = np.dot(A_inv, b)
+    graph_ax.scatter(theta_t[0], theta_t[1], color="black")
+
+    graph_ax.scatter(THETA[0], THETA[1], color="magenta")
+
+    x = np.linspace(0, 1, 50)
+    y = np.linspace(0, 1, 50)
+    x, y = np.meshgrid(x, y)
+    a = A[0][0]
+    b = A[0][1]
+    c = A[1][0]
+    d = A[1][1]
+    graph_ax.contour(
+        x,
+        y,
+        (
+            a * (x - theta_t[0]) ** 2
+            + d * (y - theta_t[1]) ** 2
+            + (b + c) * ((x - theta_t[0]) ** 2) * ((y - theta_t[1]) ** 2)
+        ),
+        [1],
+        colors="black",
+        linewidths=1,
     )
 
     graph_ax.set_xlim([-0.5, 1.5])
@@ -256,7 +296,7 @@ def plot_MAB_experiment(
         )
 
     if graph:
-        plot_graph(graph_ax, k_array, reward_array)
+        plot_graph(graph_ax, k_array, reward_array, k_list)
 
     # titles
     # plt.title('Random draws from the row of slot machines (MAB)', fontsize=10)
@@ -276,6 +316,7 @@ def plot_MAB_experiment(
                 graph_ax,
                 np.array([k_arr[:i] for k_arr in k_array]),
                 np.array([reward_arr[:i] for reward_arr in reward_array]),
+                k_list[:i],
             )
 
         # updating game rounds
