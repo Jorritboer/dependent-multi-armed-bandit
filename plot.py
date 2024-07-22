@@ -64,7 +64,7 @@ def plot_graph(
         (
             a * (x - theta_t[0]) ** 2
             + d * (y - theta_t[1]) ** 2
-            + (b + c) * ((x - theta_t[0]) ** 2) * ((y - theta_t[1]) ** 2)
+            + (b + c) * (x - theta_t[0]) * (y - theta_t[1])
         ),
         [alpha],
         colors="black",
