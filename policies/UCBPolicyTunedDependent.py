@@ -7,11 +7,12 @@ import cvxpy as cp
 # variant that rounds to 3 decimals and picks random on tie
 class UCBPolicyTunedDependent:
 
-    def __init__(self, variables, bandit_expressions):
+    def __init__(self, variables, bandit_expressions, alpha=1):
         self.parameters = [
             {"min": cp.Parameter(), "max": cp.Parameter()}
             for _ in range(len(bandit_expressions))
         ]
+        self.alpha = alpha
 
         constraints = (
             [v >= 0 for v in variables]
@@ -56,7 +57,7 @@ class UCBPolicyTunedDependent:
         V = vars + np.sqrt(2 * np.log(np.sum(total_count)) / total_count)
 
         # computing square root term
-        sqrt_term = np.sqrt(
+        sqrt_term = (1 / self.alpha) * np.sqrt(
             (np.log(np.sum(total_count)) / total_count) * np.minimum(0.25, V)
         )
 
