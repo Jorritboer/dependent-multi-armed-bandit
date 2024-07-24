@@ -1,5 +1,7 @@
 # Using Linear Programming to Solve Parametric Bernoulli Multi-Armed Bandit Problem
 
+The starting point of this code was taken from https://github.com/gdmarmerola/interactive-intro-rl. 
+
 ## Running code
 
 In `main.py` there should be everything to run the tests you could want.
