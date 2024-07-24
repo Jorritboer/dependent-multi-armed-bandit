@@ -160,19 +160,19 @@ Arguments
 
 ### Policies
 
-- TSPolicy - Thompson Sampling
-- eGreedyPolicy - epsilon greedy
-- RandomPolicy
-- UCBPolicy. UCB1 from Auer2002 "Finite-time Analysis of the Multiarmed Bandit Problem"
-- UCBPolicy2. UCB2 from the same paper.
-- UCBPolicyTuned. UCB1-Tuned from the same paper. You need to provide the arguments `variables` and `bandit_expressions` made from the package `cvxpy`, `main.py` handles this. This is the same for the other dependent policies.
-- UCBPolicyB. Variant that rounds to 3 decimals and picks random on tie
-- UCBPolicyC. Additionally to UCBPolicyB also initially max probability upper bounds at 1.
-- UCBDependent. Dependent version of UCB1.
-- UCBDependentB. Dependent version of UCBPolicyB.
-- UCBPolicy2Dependent. Dependent version of UCB2.
-- UCBPolicyTunedDependent. Dependent version of UCB1-Tuned.
-- LinUCB. LinUCB from the paper. Arguments are $\alpha$ and feature vectors, which crucially need to be np _column_ vectors. This is handled in `main.py`.
-- eGreedyPolicyDecaying. Epsilon greedy but instead of epsilon, you provide epsilon function, which for every round has to give a certain epsilon. `lin_decaying(start,end,steps)` in `main.py` provides such a function that starts epsilon at `start`, and moves towards `end` in `steps` steps.
-- eGreedyPolicyDecayingUCBTunedDependent. The same as eGreedyPolicyDecaying except that if the policy does not explore but rather exploit, it uses the UCBTunedDependent poliicy for this.
-- DerivativeExplore. Same as eGreedyPolicyDecayingUCBTunedDependent except that when the policy explores it uses the derivatives of the linear program to determine which arm would be most effective to draw in order to gain the most information about the system.
+- `TSPolicy` - Thompson Sampling
+- `eGreedyPolicy` - epsilon greedy
+- `RandomPolicy`
+- `UCBPolicy`. UCB1 from Auer2002 "Finite-time Analysis of the Multiarmed Bandit Problem"
+- `UCBPolicy2`. UCB2 from the same paper.
+- `UCBPolicyTuned`. UCB1-Tuned from the same paper. You need to provide the arguments `variables` and `bandit_expressions` made from the package `cvxpy`, `main.py` handles this. This is the same for the other dependent policies.
+- `UCBPolicyB`. Variant that rounds to 3 decimals and picks random on tie
+- `UCBPolicyC`. Additionally to UCBPolicyB also initially max probability upper bounds at 1.
+- `UCBDependent`. Dependent version of UCB1.
+- `UCBDependentB`. Dependent version of UCBPolicyB.
+- `UCBPolicy2Dependent`. Dependent version of UCB2.
+- `UCBPolicyTunedDependent`. Dependent version of UCB1-Tuned.
+- `LinUCB`. LinUCB from the paper. Arguments are $\alpha$ and feature vectors, which crucially need to be np _column_ vectors. This is handled in `main.py`.
+- `eGreedyPolicyDecaying`. Epsilon greedy but instead of epsilon, you provide epsilon function, which for every round has to give a certain epsilon. `lin_decaying(start,end,steps)` in `main.py` provides such a function that starts epsilon at `start`, and moves towards `end` in `steps` steps.
+- `eGreedyPolicyDecayingUCBTunedDependent`. The same as eGreedyPolicyDecaying except that if the policy does not explore but rather exploit, it uses the UCBTunedDependent poliicy for this.
+- `DerivativeExplore`. Same as eGreedyPolicyDecayingUCBTunedDependent except that when the policy explores it uses the derivatives of the linear program to determine which arm would be most effective to draw in order to gain the most information about the system.
