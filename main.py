@@ -5,6 +5,7 @@ from policies import *
 import cvxpy as cp
 from simulation import simulation
 from plot_simulation import plot_simulation
+from random_bandits import random_bandits
 
 
 class MAB:
@@ -103,14 +104,14 @@ algorithms = {
     "LinUCB2": LinUCB(1, column_vecs).choose_bandit,
 }
 
-results = simulation(mab, algorithms, 150, 5)
-# plot_simulation(results, len(mab.bandit_probs), plot_reward=False)
+results = simulation(mab, algorithms, 100, 5)
+plot_simulation(results, len(mab.bandit_probs), plot_reward=False)
 
 
 # %%
 
 for policy in algorithms.keys():
-    print(policy, np.sum(results[policy]["regret_array"]))
-    print(policy, results[policy]["computation_time"])
+    print(policy, np.sum(results[policy]["regret_array"], axis=1))
+    # print(policy, results[policy]["computation_time"])
 
 # %%

@@ -4,8 +4,8 @@ import numpy as np
 def random_bandits(nr_parameters, nr_bandits, max_prob=0.65):
     theta = [np.random.uniform(0, 1) for _ in range(nr_parameters)]
 
-    bandits = []
-    for _ in range(nr_bandits):
+    bandits = np.zeros((nr_bandits, nr_parameters))
+    for i in range(nr_bandits):
         x = [np.random.uniform(-1, 1) for _ in range(nr_parameters)]
 
         p = np.dot(x, theta)
@@ -16,6 +16,6 @@ def random_bandits(nr_parameters, nr_bandits, max_prob=0.65):
             #     break
             x = [np.random.uniform(-1, 1) for _ in range(nr_parameters)]
             p = np.dot(x, theta)
-        bandits.append(x)
+        bandits[i] = x
 
     return theta, bandits

@@ -27,7 +27,7 @@ def simulation(
     }
 
     # loop for each simulation
-    for simulation in tqdm(range(n_simulations)):
+    for simulation in tqdm(range(n_simulations), leave=False):
 
         if uncertainty:
             for i in range(n_bandits):
