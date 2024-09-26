@@ -1,6 +1,6 @@
 # Using Linear Programming to Solve Parametric Bernoulli Multi-Armed Bandit Problem
 
-The starting point of this code was taken from https://github.com/gdmarmerola/interactive-intro-rl. 
+The starting point of this code was taken from https://github.com/gdmarmerola/interactive-intro-rl.
 
 ## Running code
 
@@ -137,7 +137,7 @@ Arguments:
 
 ### Simulation
 
-Simulates some number of runs of multiple policies on a certain MAB, and outputs a plot of average cumulative regret like this:
+Simulates some number of runs of multiple policies on a certain MAB. This can then be input into `plot_simulation` to plot this:
 ![simulation](img/simulation.png)
 
 ```python
@@ -146,8 +146,21 @@ def simulation(
     policies,
     n_rounds=1000,
     n_simulations=1000,
-    plot_reward=False,
     uncertainty=None,
+):
+```
+
+Returns a dictionary which has for every policy:
+
+- `k_array` for every bandit for every round number of times that bandit was selected that round
+- `reward_array` for every bandit for every round number of times that bandit gave a reward in that round
+- `regret_array` for every simulation for every round the regret
+
+```python
+def plot_simulation(
+    results_dict,
+    n_bandits,
+    plot_reward=False
 ):
 ```
 

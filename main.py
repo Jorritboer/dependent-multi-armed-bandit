@@ -4,6 +4,7 @@ import plot
 from policies import *
 import cvxpy as cp
 from simulation import simulation
+from plot_simulation import plot_simulation
 
 
 class MAB:
@@ -23,8 +24,21 @@ def lin_decaying(start, end, steps):
 
 
 # %%
-bandit_matrix = np.array([[1, 0], [1, -1], [0, 1], [-0.4, 1.5]])
-values = [0.6, 0.5]
+bandit_matrix = np.array(
+    [
+        [1, 1, 1, 0, 0],
+        [1, 1, 0, 1, 0],
+        [1, 1, 0, 0, 1],
+        [1, 0, 1, 1, 0],
+        [1, 0, 1, 0, 1],
+        [1, 0, 0, 1, 1],
+        [0, 1, 1, 1, 0],
+        [0, 1, 1, 0, 1],
+        [0, 1, 0, 1, 1],
+        [0, 0, 1, 1, 1],
+    ]
+)
+values = [0.15, 0.3, 0.3, 0.05, 0.1]
 
 bandit_probs = np.dot(bandit_matrix, values)
 mab = MAB(bandit_probs)
@@ -84,9 +98,13 @@ algorithms = {
     # "ucb-tuned_dep": UCBPolicyTunedDependent(
     #     variables, bandit_expressions
     # ).choose_bandit,
+    "LinUCB0.5": LinUCB(1, column_vecs).choose_bandit,
     "LinUCB1": LinUCB(1, column_vecs).choose_bandit,
+    "LinUCB2": LinUCB(1, column_vecs).choose_bandit,
 }
 
-simulation(mab, algorithms, 2500, 15, plot_reward=False)
+results = simulation(mab, algorithms, 1500, 5)
+plot_simulation(results, len(mab.bandit_probs), plot_reward=False)
+
 
 # %%
