@@ -103,8 +103,14 @@ algorithms = {
     "LinUCB2": LinUCB(1, column_vecs).choose_bandit,
 }
 
-results = simulation(mab, algorithms, 1500, 5)
-plot_simulation(results, len(mab.bandit_probs), plot_reward=False)
+results = simulation(mab, algorithms, 150, 5)
+# plot_simulation(results, len(mab.bandit_probs), plot_reward=False)
 
+
+# %%
+
+for policy in algorithms.keys():
+    print(policy, np.sum(results[policy]["regret_array"]))
+    print(policy, results[policy]["computation_time"])
 
 # %%

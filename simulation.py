@@ -1,5 +1,6 @@
 import numpy as np
 from tqdm import tqdm
+import time
 
 
 def simulation(
@@ -20,6 +21,7 @@ def simulation(
             "k_array": np.zeros((n_bandits, n_rounds)),
             "reward_array": np.zeros((n_bandits, n_rounds)),
             "regret_array": np.zeros((n_simulations, n_rounds)),
+            "computation_time": np.zeros(n_simulations),
         }
         for policy in policies.keys()
     }
@@ -39,6 +41,7 @@ def simulation(
             reward_array = np.zeros((n_bandits, n_rounds))
             regret_array = np.zeros((1, n_rounds))[0]
 
+            start = time.time()
             # loop for each round
             for round_id in tqdm(range(n_rounds), desc=key, leave=False):
 
@@ -50,10 +53,12 @@ def simulation(
                 k_array[k, round_id] = 1
                 reward_array[k, round_id] = reward
                 regret_array[round_id] = regret
+            end = time.time()
 
             # results for the simulation
             results_dict[key]["k_array"] += k_array
             results_dict[key]["reward_array"] += reward_array
             results_dict[key]["regret_array"][simulation] = regret_array
+            results_dict[key]["computation_time"][simulation] = end - start
 
     return results_dict
