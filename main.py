@@ -27,19 +27,12 @@ def lin_decaying(start, end, steps):
 # %%
 bandit_matrix = np.array(
     [
-        [1, 1, 1, 0, 0],
-        [1, 1, 0, 1, 0],
-        [1, 1, 0, 0, 1],
-        [1, 0, 1, 1, 0],
-        [1, 0, 1, 0, 1],
-        [1, 0, 0, 1, 1],
-        [0, 1, 1, 1, 0],
-        [0, 1, 1, 0, 1],
-        [0, 1, 0, 1, 1],
-        [0, 0, 1, 1, 1],
+        [1, 1, 0, 0.5],
+        [1, 0, 1, 0.5],
+        [0, 1, 1, 0.2],
     ]
 )
-values = [0.15, 0.3, 0.3, 0.05, 0.1]
+values = [0.1, 0.2, 0.3, 0.2]
 
 bandit_probs = np.dot(bandit_matrix, values)
 mab = MAB(bandit_probs)
@@ -87,9 +80,9 @@ algorithms = {
     # "ucb-B": UCBPolicyB().choose_bandit,
     # "ucb-C": UCBPolicyC().choose_bandit,
     # "ucb-dependent": UCBDependent(variables, bandit_expressions).choose_bandit,
-    "DependentUCB5": UCBDependentB(
-        variables, bandit_expressions, alpha=5
-    ).choose_bandit,
+    # "DependentUCB": UCBDependentB(
+    #     variables, bandit_expressions, alpha=3.5
+    # ).choose_bandit,
     # "ucb-dependent": UCBDependentB(variables, bandit_expressions).choose_bandit,
     # "ucb2(0.5)": UCBPolicy2(0.5, len(bandit_probs)).choose_bandit,
     # "ucb2_dep(0.5)": UCBPolicy2Dependent(
@@ -99,12 +92,13 @@ algorithms = {
     # "ucb-tuned_dep": UCBPolicyTunedDependent(
     #     variables, bandit_expressions
     # ).choose_bandit,
-    "LinUCB0.5": LinUCB(1, column_vecs).choose_bandit,
-    "LinUCB1": LinUCB(1, column_vecs).choose_bandit,
-    "LinUCB2": LinUCB(1, column_vecs).choose_bandit,
+    # "LinUCB0.5": LinUCB(1, column_vecs).choose_bandit,
+    # "LinUCB": LinUCB(1, column_vecs).choose_bandit,
+    # "LinUCB2": LinUCB(1, column_vecs).choose_bandit,
+    "IdeaMerlijn": IdeaMerlijn(bandit_matrix).choose_bandit,
 }
 
-results = simulation(mab, algorithms, 100, 5)
+results = simulation(mab, algorithms, 1000, 5)
 plot_simulation(results, len(mab.bandit_probs), plot_reward=False)
 
 

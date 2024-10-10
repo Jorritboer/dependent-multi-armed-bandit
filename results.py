@@ -47,9 +47,9 @@ for n in tqdm([3, 10, 30], desc=f"nr_bandits", leave=False):
             "DependentUCB6.5": UCBDependentB(
                 variables, bandit_expressions, alpha=6.5
             ).choose_bandit,
-            "LinUCB0.5": LinUCB(1, column_vecs).choose_bandit,
+            "LinUCB0.5": LinUCB(0.5, column_vecs).choose_bandit,
             "LinUCB1": LinUCB(1, column_vecs).choose_bandit,
-            "LinUCB2": LinUCB(1, column_vecs).choose_bandit,
+            "LinUCB2": LinUCB(2, column_vecs).choose_bandit,
         }
 
         results = simulation(mab, algorithms, 1000, 5)

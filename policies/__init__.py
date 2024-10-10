@@ -14,3 +14,4 @@ from .UCBPolicyC import *
 from .UCBPolicyTuned import *
 from .UCBPolicyTunedDependent import *
 from .LinUCB import *
+from .IdeaMerlijn import *
