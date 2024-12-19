@@ -78,6 +78,11 @@ def plot_graph(
     graph_ax.plot([1, 0], [1, 1], linewidth=1, color="black")
     graph_ax.plot([0, 0], [1, 0], linewidth=1, color="black")
 
+    graph_ax.axhline(-0.5, color="black")
+    graph_ax.axvline(-0.5, color="black")
+    graph_ax.set_xlabel("$\\theta_1$")
+    graph_ax.set_ylabel("$\\theta_2$")
+
     x = np.linspace(-0.5, 1.5, 10)
     y = np.linspace(-0.5, 1.5, 10)
     x, y = np.meshgrid(x, y)
