@@ -13,19 +13,21 @@ def plot_simulation(results_dict, n_bandits, plot_reward=False):
 
     def plot_regret(plot_uncertainty):
         # opening figure to plot regret
-        plt.figure(figsize=(10, 3), dpi=150)
+        fig = plt.figure(figsize=(10, 3), dpi=150)
 
         # NUM_COLORS = len(policies.items())
         # cm = plt.get_cmap("inferno")
         # plt.gca().set_prop_cycle(
         #     color=[cm(1.0 * i / NUM_COLORS) for i in range(NUM_COLORS)]
         # )
+        prop_cycle = plt.rcParams["axes.prop_cycle"]
+        colors = prop_cycle.by_key()["color"]
 
         # loop for each decision policy
-        for policy in policies:
+        for i, policy in enumerate(policies):
 
             # plotting data
-            color = next(plt.gca()._get_lines.prop_cycler)["color"]
+            color = colors[i % len(colors)]
             if plot_reward:
                 plt.plot(
                     np.cumsum(
